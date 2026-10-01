@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Next-Step Board</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f4fb;
+  --card: #ffffff;
+  --ink: #1d1a3a;
+  --mut: #66628a;
+  --line: #dedcf0;
+  --btn: #2d2670;
+  --btnt: #ffffff;
+  --do: #ffd9d4;
+  --decide: #d9e4ff;
+  --dash: #fff1a8;
+  --delegate: #d8f3e6;
+  --defer: #e8e0ff;
+  --dump: #e9e8ee;
+  --recharge: #d9f0ff;
+  --reward: #ffe3f1;
+  --reset: #d8f3e6;
+  --drain: #e9e8ee;
+  --warn: #c2260f;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14122b;
+    --card: #1f1c3d;
+    --ink: #efedff;
+    --mut: #a7a3cc;
+    --line: #352f66;
+    --btn: #b9a7ff;
+    --btnt: #14122b;
+    --do: #5a2330;
+    --decide: #243466;
+    --dash: #5a4d12;
+    --delegate: #17483a;
+    --defer: #3b2f74;
+    --dump: #2d2b45;
+    --recharge: #17415a;
+    --reward: #5a2347;
+    --reset: #17483a;
+    --drain: #2d2b45;
+    --warn: #ff8a78;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #14122b;
+  --card: #1f1c3d;
+  --ink: #efedff;
+  --mut: #a7a3cc;
+  --line: #352f66;
+  --btn: #b9a7ff;
+  --btnt: #14122b;
+  --do: #5a2330;
+  --decide: #243466;
+  --dash: #5a4d12;
+  --delegate: #17483a;
+  --defer: #3b2f74;
+  --dump: #2d2b45;
+  --recharge: #17415a;
+  --reward: #5a2347;
+  --reset: #17483a;
+  --drain: #2d2b45;
+  --warn: #ff8a78;
+}
+
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+*, *:before, *:after { box-sizing: inherit; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+main { max-width: 1000px; margin: 0 auto; padding: 24px 16px 56px; }
+
+h1, h2 { font-family: "Bricolage Grotesque", system-ui, sans-serif; margin: 0; }
+h1 { font-size: clamp(2rem, 6vw, 3rem); font-weight: 800; line-height: 1.05; letter-spacing: -.02em; }
+.sub { color: var(--mut); margin: 8px 0 20px; max-width: 56ch; }
+
+.tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+.tabs button { flex: 0 0 auto; padding: 10px 18px; border-radius: 999px; border: 2px solid var(--line); background: transparent; color: var(--ink); font: inherit; font-weight: 600; cursor: pointer; transition: background 0.15s ease, border-color 0.15s ease; }
+.tabs button[aria-selected="true"] { background: var(--btn); color: var(--btnt); border-color: var(--btn); }
+button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px solid var(--btn); outline-offset: 2px; }
+
+form { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: grid; gap: 12px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+.row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+label { display: grid; gap: 4px; font-size: .85rem; color: var(--mut); font-weight: 600; }
+input, select { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px; width: 100%; }
+
+.add { justify-self: start; padding: 11px 22px; border: 0; border-radius: 10px; background: var(--btn); color: var(--btnt); font: inherit; font-weight: 700; cursor: pointer; transition: opacity 0.15s ease; }
+.add:hover { opacity: 0.9; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+.box { border-radius: 14px; padding: 14px; min-height: 150px; background: var(--c); border: 1px solid var(--line); }
+.box h2 { font-size: 1.4rem; }
+.hint { font-size: .85rem; color: var(--mut); margin: 2px 0 10px; }
+.empty { font-size: .85rem; color: var(--mut); font-style: italic; }
+
+.item { display: flex; align-items: flex-start; gap: 10px; background: var(--card); border-radius: 10px; padding: 10px; margin-top: 8px; transition: opacity 0.2s ease; border: 1px solid var(--line); }
+.item.done { opacity: 0.6; }
+.item.done .t { text-decoration: line-through; opacity: .7; }
+.item input[type=checkbox] { width: 20px; height: 20px; margin-top: 2px; flex: none; accent-color: var(--btn); cursor: pointer; }
+.t { flex: 1; word-break: break-word; }
+.x { border: 0; background: none; color: var(--mut); font-size: 1.2rem; cursor: pointer; line-height: 1; padding: 2px 6px; border-radius: 4px; }
+.x:hover { color: var(--warn); background: rgba(0,0,0,0.05); }
+.flag { display: block; margin-top: 4px; font-size: .82rem; font-weight: 700; color: var(--warn); }
+
+.ideas { margin-top: 14px; padding-top: 10px; border-top: 1px dashed var(--mut); }
+.ideas h3 { margin: 0 0 4px; font-size: 1rem; font-family: "Bricolage Grotesque", system-ui, sans-serif; }
+.ideas ul { margin: 0; padding-left: 20px; font-size: .9rem; color: var(--mut); }
+.note { margin: 0; font-size: .92rem; color: var(--mut); }
+.lnk { border: 0; background: none; padding: 0; font: inherit; font-weight: 700; color: var(--btn); text-decoration: underline; cursor: pointer; }
+.rw { max-width: 340px; }
+
+.pop { position: fixed; inset: 0; z-index: 10; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(20,18,43,.65); backdrop-filter: blur(2px); }
+.popc { background: var(--card); color: var(--ink); border-radius: 16px; padding: 24px; max-width: 380px; width: 100%; text-align: left; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); }
+.popc p { margin: 8px 0 16px; font-size: 1.05rem; line-height: 1.4; }
+.chip { font-size: .75rem; font-weight: 600; color: var(--mut); border: 1px solid var(--line); border-radius: 999px; padding: 1px 8px; white-space: nowrap; margin-left: 4px; }
+.nudge { color: var(--btn); }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <h1>The Next-Step Board</h1>
+  <p class="sub">Dump every task and break idea. Answer quick questions, and the board categorizes what to do and how to reset. Saved automatically in your browser.</p>
+  
+  <div class="tabs" role="tablist">
+    <button role="tab" id="tab-t" aria-controls="p-t" aria-selected="true">Tasks</button>
+    <button role="tab" id="tab-b" aria-controls="p-b" aria-selected="false">Breaks</button>
+  </div>
+
+  <section id="p-t" role="tabpanel" aria-labelledby="tab-t">
+    <form id="ft">
+      <label>What do you need to do?<input id="tn" required maxlength="120" placeholder="e.g. Study phenol for tomorrow's test"></label>
+      <div class="row" id="tsel"></div>
+      <p class="note">Feeling overwhelmed? Go to the <button type="button" class="lnk" id="go-b">Breaks tab</button> and dump everything you wish you were doing instead.</p>
+      <label class="rw">Automatic break reminder: after how many finished tasks?
+        <select id="rn">
+          <option value="0">Off</option>
+          <option value="1">Every task</option>
+          <option value="2">Every 2 tasks</option>
+          <option value="3">Every 3 tasks</option>
+          <option value="4">Every 4 tasks</option>
+          <option value="5">Every 5 tasks</option>
+        </select>
+      </label>
+      <button class="add" type="submit">Add task</button>
+    </form>
+    <div class="grid" id="tg"></div>
+  </section>
+
+  <section id="p-b" role="tabpanel" aria-labelledby="tab-b" hidden>
+    <form id="fb">
+      <label>What's the break?<input id="bn" required maxlength="120" placeholder="e.g. Watch a movie or take a stroll"></label>
+      <div class="row" id="bsel"></div>
+      <button class="add" type="submit">Add break</button>
+    </form>
+    <div class="grid" id="bg"></div>
+  </section>
+</main>
+
+<div class="pop" id="pop" role="dialog" aria-modal="true" aria-labelledby="pt" hidden>
+  <div class="popc">
+    <h2 id="pt">Break Time</h2>
+    <p id="pm"></p>
+    <button class="add" id="pc" type="button">Back in a bit</button>
+  </div>
+</div>
+
+<script>
+var T_OPTS = [
+  ["imp", "How important is it?", ["High", "Medium", "Low"]],
+  ["urg", "How urgent is it?", ["Due today", "This week", "No deadline"]],
+  ["skip", "Will skipping it hurt you?", ["Big", "Small", "None"]],
+  ["want", "How much do you want to do it?", ["Love it", "Meh", "Dreading it"]],
+  ["del", "Can someone else do it?", ["No", "Yes"]]
+];
+
+var B_OPTS = [
+  ["en", "Energy it takes", ["Low", "High"]],
+  ["ref", "How much does it refill you?", ["A lot", "Some", "Barely"]],
+  ["time", "How long does it take?", ["Under 15 min", "About 30 min", "1 hour or more", "A wish for some other time"]]
+];
+
+var T_BOX = [
+  ["Do", "Important and urgent. Start here.", "--do"],
+  ["Decide", "Important, not urgent yet. Pick a date and time for it.", "--decide"],
+  ["Dash", "Not important, but it has to happen. Knock it out in a 15-minute burst.", "--dash"],
+  ["Delegate", "Someone else can take this. Hand it off.", "--delegate"],
+  ["Defer", "Park it and check back once a week.", "--defer"],
+  ["Dump", "Not worth your time. Delete it.", "--dump"]
+];
+
+var B_BOX = [
+  ["Recharge", "Low effort, refills you a lot. Nap, music, fresh air.", "--recharge"],
+  ["Reward", "Takes energy but feels great. Save it for after your Do tasks.", "--reward"],
+  ["Reset", "Light effort that helps you restart. Stretch, tidy your desk.", "--reset"],
+  ["Drain", "Feels like a break but leaves you emptier. Doomscrolling lives here.", "--drain"]
+];
+
+var TASK_MESSAGES = [
+  "Nice work, that's another task done. Step away for 5 minutes and stretch.",
+  "You showed up and finished things. Drink a glass of water and look out a window.",
+  "Progress is progress. Take a short walk and let your brain rest.",
+  "Look at you, getting it done! Put on a favorite song and just listen.",
+  "You earned a pause. Close your eyes and breathe slowly for one minute.",
+  "Great momentum. Grab a snack you actually like and eat it away from a screen.",
+  "That took effort, and you did it. Step outside for some fresh air.",
+  "Small wins add up. Tidy one tiny corner or roll your shoulders for a few minutes.",
+  "Well done. Message someone you like, or just rest your eyes for a bit.",
+  "You're doing the hard part. Take a break, then come back when you're ready."
+];
+
+var BREAK_DONE_MSGS = [
+  "Break’s done whenever you’re ready. Time to get back to it.",
+  "Hope that helped! Whenever you’re ready, let’s get back to work.",
+  "Feeling a little more refreshed? Time to ease back into it.",
+  "And that’s your little reset. Ready for the next thing?",
+  "Take a breath, check this off, and let’s get back to it.",
+  "Your break is all done. Let’s pick up where we left off.",
+  "A little rest goes a long way. Ready to get back to it?",
+  "Okay, refreshed? Let’s slowly get back into the groove.",
+  "Break complete ♡ Now, whenever you’re ready, back to it.",
+  "That was your reset. Let’s see what task is next."
+];
+
+var HEALTHY = '<div class="ideas"><h3>Healthy recharge ideas</h3><ul><li>A 20-minute nap</li><li>A short walk outside</li><li>Water and a real snack</li><li>Gentle stretching or yoga</li><li>A call with a friend or family</li><li>A warm shower</li><li>Quiet time with music or journaling</li></ul></div>';
+var AVOID = '<div class="ideas"><h3>Absolutely avoid these</h3><ul><li>Doomscrolling social media</li><li>Endless short videos</li><li>Staying up late to "get time for yourself"</li><li>Mindless snacking or sugar crashes</li><li>Checking messages and emails "just once"</li><li>Binge-watching one more episode</li></ul></div>';
+
+var S = { tasks: [], breaks: [], n: 0, cnt: 0, bag: [], breakBag: [] };
+
+try {
+  var raw = localStorage.getItem("nsb1");
+  if (raw) {
+    var p = JSON.parse(raw);
+    if (p && Array.isArray(p.tasks) && Array.isArray(p.breaks)) S = p;
+  }
+} catch (e) {}
+
+S.n = +S.n || 0;
+S.cnt = +S.cnt || 0;
+S.bag = Array.isArray(S.bag) ? S.bag : [];
+S.breakBag = Array.isArray(S.breakBag) ? S.breakBag : [];
+
+function save() {
+  try { localStorage.setItem("nsb1", JSON.stringify(S)); } catch (e) {}
+}
+
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, function(c) {
+    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+  });
+}
+
+function opts(el, list) {
+  el.innerHTML = list.map(function(o) {
+    return '<label>' + o[1] + '<select name="' + o[0] + '">' + o[2].map(function(v) {
+      return '<option>' + v + '</option>';
+    }).join("") + '</select></label>';
+  }).join("");
+}
+
+opts(document.getElementById("tsel"), T_OPTS);
+opts(document.getElementById("bsel"), B_OPTS);
+
+function tbox(t) {
+  var h = t.imp === "High", td = t.urg === "Due today", wk = t.urg === "This week", nd = t.urg === "No deadline", big = t.skip === "Big", none = t.skip === "None", low = t.imp === "Low";
+  if (h) return (td || (wk && big)) ? "Do" : "Decide";
+  if (td && big && t.imp === "Medium") return "Do";
+  if (t.del === "Yes" && !nd) return "Delegate";
+  if (nd) return (low && none) ? "Dump" : "Defer";
+  return (low && none) ? "Dump" : "Dash";
+}
+
+function bbox(b) {
+  if (b.ref === "Barely") return "Drain";
+  if (b.ref === "A lot") return b.en === "Low" ? "Recharge" : "Reward";
+  return b.en === "Low" ? "Reset" : "Reward";
+}
+
+function avoiding(t) {
+  return t.want === "Dreading it" && (t.imp === "High" || t.skip === "Big");
+}
+
+function render() {
+  // Render Tasks Grid
+  var tg = document.getElementById("tg");
+  tg.innerHTML = T_BOX.map(function(b) {
+    var items = S.tasks.filter(function(t) { return tbox(t) === b[0]; })
+      .sort(function(a, c) { return (avoiding(c) ? 1 : 0) - (avoiding(a) ? 1 : 0); });
+    
+    return '<div class="box" style="--c:var(' + b[2] + ')"><h2>' + b[0] + '</h2><p class="hint">' + b[1] + '</p>' +
+      (items.length ? items.map(function(t) {
+        return '<div class="item' + (t.done ? " done" : "") + '">' +
+          '<input type="checkbox" data-k="tasks" data-d="' + t.id + '"' + (t.done ? " checked" : "") + ' aria-label="Mark task complete">' +
+          '<span class="t">' + esc(t.name) + (avoiding(t) && !t.done ? '<span class="flag">This is the one you are avoiding. Start with just 10 minutes.</span>' : "") + '</span>' +
+          '<button class="x" data-k="tasks" data-x="' + t.id + '" aria-label="Delete task">&times;</button>' +
+        '</div>';
+      }).join("") : '<p class="empty">Nothing here yet.</p>') + '</div>';
+  }).join("");
+
+  // Render Breaks Grid (With Checkboxes!)
+  var bg = document.getElementById("bg");
+  bg.innerHTML = B_BOX.map(function(b) {
+    var items = S.breaks.filter(function(t) { return bbox(t) === b[0]; });
+    return '<div class="box" style="--c:var(' + b[2] + ')"><h2>' + b[0] + '</h2><p class="hint">' + b[1] + '</p>' +
+      (items.length ? items.map(function(t) {
+        return '<div class="item' + (t.done ? " done" : "") + '">' +
+          '<input type="checkbox" data-k="breaks" data-d="' + t.id + '"' + (t.done ? " checked" : "") + ' aria-label="Mark break complete">' +
+          '<span class="t">' + esc(t.name) +
+          (t.time ? ' <span class="chip">' + esc(t.time) + '</span>' : "") +
+          (t.time === "A wish for some other time" ? '<span class="flag nudge">Plan for this activity, book appointments, look at inspo, or talk to your family/friends about it.</span>' :
+           t.time === "1 hour or more" ? '<span class="flag nudge">You’re working hard just make sure you don’t slip into a break slump.</span>' : "") +
+          '</span><button class="x" data-k="breaks" data-x="' + t.id + '" aria-label="Delete break">&times;</button></div>';
+      }).join("") : '<p class="empty">Nothing here yet.</p>') +
+      (b[0] === "Recharge" ? HEALTHY : b[0] === "Drain" ? AVOID : "") + '</div>';
+  }).join("");
+}
+
+function add(form, input, key) {
+  form.addEventListener("submit", function(e) {
+    e.preventDefault();
+    var o = { id: Date.now() + Math.random().toString(36).slice(2, 6), name: input.value.trim(), done: false };
+    Array.prototype.forEach.call(form.querySelectorAll("select"), function(s) { o[s.name] = s.value; });
+    if (!o.name) return;
+    S[key].push(o);
+    input.value = "";
+    save();
+    render();
+    input.focus();
+  });
+}
+
+add(document.getElementById("ft"), document.getElementById("tn"), "tasks");
+add(document.getElementById("fb"), document.getElementById("bn"), "breaks");
+
+document.addEventListener("click", function(e) {
+  var x = e.target.getAttribute && e.target.getAttribute("data-x");
+  if (x) {
+    var k = e.target.getAttribute("data-k");
+    S[k] = S[k].filter(function(t) { return t.id !== x; });
+    save();
+    render();
+  }
+});
+
+function nextMsg(list, bagKey) {
+  if (!S[bagKey].length) {
+    S[bagKey] = list.map(function(_, i) { return i; });
+    for (var i = S[bagKey].length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var temp = S[bagKey][i];
+      S[bagKey][i] = S[bagKey][j];
+      S[bagKey][j] = temp;
+    }
+  }
+  return list[S[bagKey].pop()];
+}
+
+var pop = document.getElementById("pop");
+function showPop(title, message) {
+  document.getElementById("pt").textContent = title;
+  document.getElementById("pm").textContent = message;
+  pop.hidden = false;
+  document.getElementById("pc").focus();
+}
+
+document.getElementById("pc").onclick = function() { pop.hidden = true; };
+document.addEventListener("keydown", function(e) { if (e.key === "Escape") pop.hidden = true; });
+
+var rn = document.getElementById("rn");
+rn.value = String(S.n);
+rn.addEventListener("change", function() {
+  S.n = +rn.value;
+  S.cnt = 0;
+  save();
+});
+
+document.addEventListener("change", function(e) {
+  var d = e.target.getAttribute && e.target.getAttribute("data-d");
+  var k = e.target.getAttribute && e.target.getAttribute("data-k");
+  
+  if (d && k && S[k]) {
+    var showTaskBreakPop = false;
+    var showBreakDonePop = false;
+
+    S[k].forEach(function(t) {
+      if (t.id === d) {
+        var was = !!t.done;
+        t.done = e.target.checked;
+
+        if (k === "tasks") {
+          if (t.done && !was) {
+            S.cnt++;
+            if (S.n > 0 && S.cnt >= S.n) {
+              S.cnt = 0;
+              showTaskBreakPop = true;
+            }
+          } else if (!t.done && was && S.cnt > 0) {
+            S.cnt--;
+          }
+        } else if (k === "breaks") {
+          if (t.done && !was) {
+            showBreakDonePop = true;
+          }
+        }
+      }
+    });
+
+    save();
+
+    // Toggle visual line-through state on the DOM item immediately
+    var itemEl = e.target.closest('.item');
+    if (itemEl) itemEl.classList.toggle('done', e.target.checked);
+
+    if (showTaskBreakPop) {
+      showPop("Break time", nextMsg(TASK_MESSAGES, 'bag'));
+    } else if (showBreakDonePop) {
+      showPop("Ready to resume?", nextMsg(BREAK_DONE_MSGS, 'breakBag'));
+    }
+  }
+});
+
+function tab(w) {
+  var isTasks = w === "t";
+  document.getElementById("p-t").hidden = !isTasks;
+  document.getElementById("p-b").hidden = isTasks;
+  document.getElementById("tab-t").setAttribute("aria-selected", isTasks);
+  document.getElementById("tab-b").setAttribute("aria-selected", !isTasks);
+}
+
+document.getElementById("tab-t").onclick = function() { tab("t"); };
+document.getElementById("tab-b").onclick = function() { tab("b"); };
+document.getElementById("go-b").onclick = function() { tab("b"); window.scrollTo(0, 0); };
+
+render();
+</script>
+</body>
+</html>
